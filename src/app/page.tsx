@@ -16,16 +16,18 @@ export default function Home() {
       </div>
 
       {/* 1. IMAGEM CENTRAL (MAPA) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <Image
-          src="/images/mapa-sp.png"
-          alt="Mapa da cidade de São Paulo"
-          width={600}
-          height={600}
-          className="object-contain opacity-90"
-          priority
-        />
-      </div>
+     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+  {/* Adicionamos mx-auto aqui embaixo */}
+  <div className="relative w-[90%] max-w-[800px] aspect-square mx-auto">
+    <Image
+      src="/images/mapa-sp.png"
+      alt="Mapa da cidade de São Paulo"
+      fill
+      className="object-contain opacity-90"
+      priority
+    />
+  </div>
+</div>
 
       {/* 2. ESTRELAS DE NAVEGAÇÃO (Voando pelo mapa) */}
       <div className="relative w-full h-full z-30">
