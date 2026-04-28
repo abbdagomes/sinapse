@@ -26,7 +26,8 @@ export default function Loja() {
     audio.play().catch(err => console.log("Erro ao tocar som:", err));
   };
 
-  const addToCart = (produto) => {
+  // Adicione o ": any" depois de produto
+const addToCart = (produto: any) => {
     const novoItem = { ...produto, cartId: Math.random() };
     setCarrinho((prev) => [...prev, novoItem]);
   };
