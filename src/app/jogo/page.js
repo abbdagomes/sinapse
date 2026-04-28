@@ -6,11 +6,13 @@ import decomp from 'poly-decomp';
 Matter.Common.setDecomp(decomp);
 import Image from "next/image";
 import html2canvas from 'html2canvas';
+import Menu from "../../components/Menu";
 
 import FinalPoster from "./components/FinalPoster";
 import { PROMPTS } from "../../data/prompts";
 import { ITEMS, SCALE } from "../../data/items";
 import { randomItems, extractTextFromAnswers, shuffleArray } from "../../lib/utils";
+
 
 const DEFAULT_SLOT_W = 160;
 const DEFAULT_SLOT_H = 80;
@@ -367,194 +369,193 @@ if (slotEl) {
   }, [draggingItem, activeSlotId]);
 
   /* =========================
-      RENDER
+      INIT PHYSICS ENGINE
   ========================= */
+  useEffect(() => {
+    if (!currentPrompt) return;
+
+    const engine = Matter.Engine.create({ gravity: { x: 0, y: 1.1 } });
+    engineRef.current = engine;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const floor = Matter.Bodies.rectangle(width / 2, height - 10, width, 120, { isStatic: true });
+    const left = Matter.Bodies.rectangle(-60, height / 2, 120, height, { isStatic: true });
+    const right = Matter.Bodies.rectangle(width + 60, height / 2, 120, height, { isStatic: true });
+
+    Matter.World.add(engine.world, [floor, left, right]);
+
+    let frameId;
+    const loop = () => {
+      Matter.Engine.update(engine, 1000 / 60);
+      const next = [];
+      bodiesRef.current.forEach((body, uid) => {
+        const data = activeItemsRef.current.get(uid);
+        if (data) next.push({ ...data, x: body.position.x, y: body.position.y, angle: body.angle });
+      });
+      setPhysicsItems(next);
+      frameId = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      Matter.Engine.clear(engine);
+    };
+  }, [currentPrompt]);
+
+  /* =========================
+      RENDER PRINCIPAL
+  ========================= */
+
+  // 1. TELA FINAL (Aparece ao terminar o jogo ou pular)
   if (isGameFinished) {
-    return <FinalPoster selectedItems={finalItems} />;
+    return (
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        {/* Menu fixo sobre o poster final */}
+        <div style={{ position: "fixed", top: 0, left: 0, zIndex: 9999 }}>
+          <Menu iconePersonalizado="/images/menu6.png" tamanho={110} />
+        </div>
+        <FinalPoster selectedItems={finalItems} />
+      </div>
+    );
   }
 
+  // 2. TELA DE CARREGAMENTO
   if (!currentPrompt) {
-    return <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center", alignItems: "center", fontSize: "2rem", color: "#000", backgroundColor: "#f9f9f9" }}>Carregando jogo...</div>;
+    return (
+      <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center", alignItems: "center", fontSize: "2rem", backgroundColor: "#f9f9f9" }}>
+        Carregando jogo...
+      </div>
+    );
   }
 
+  // 3. TELA DO JOGO (Gameplay)
   return (
     <main
       ref={containerRef}
       style={{
-        height: "100vh",
-        width: "100vw",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "system-ui, sans-serif",
-        userSelect: "none",
-        WebkitUserSelect: "none",
-        backgroundColor: "#f9f9f9",
-        cursor: draggingItem ? "grabbing" : "auto"
+        height: "100vh", width: "100vw", position: "relative", overflow: "hidden",
+        backgroundColor: "#f9f9f9", cursor: draggingItem ? "grabbing" : "auto"
       }}
     >
+      {/* Menu fixo durante a gameplay */}
+      <div style={{ position: "fixed", top: 0, left: 0, zIndex: 9999 }}>
+        <Menu iconePersonalizado="/images/menu6.png" tamanho={110} />
+      </div>
+
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes marching-ants {
-          to { stroke-dashoffset: -20; }
-        }
-        .slot-path {
-          fill: transparent;
-          stroke: #000;
-          stroke-width: 2;
-          stroke-dasharray: 6 4;
-          animation: marching-ants 0.5s linear infinite;
-        }
+        @keyframes ants { to { stroke-dashoffset: -20; } }
+        .slot-path { fill: transparent; stroke: #000; stroke-width: 2; stroke-dasharray: 6 4; animation: ants 0.5s linear infinite; }
       `}} />
 
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "2rem"
-      }}>
-        <div style={{
-          fontSize: "75px",
-          maxWidth: "80vw",
-          lineHeight: "1.15",
-          textAlign: "center",
-          whiteSpace: "pre-wrap",
-          color: "#191919",
-          fontWeight: "bold"
-        }}>
+      {/* BARRA DE PROGRESSO E PULAR */}
+      {!isGameFinished && (
+        <div style={{ position: "absolute", top: "40px", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", zIndex: 100 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <span style={{ fontSize: "14px", fontWeight: "bold", color: "#001bff", textTransform: "uppercase" }}>Frase {promptIndex + 1} de {currentPromptsList.length}</span>
+            <button 
+              onClick={() => {
+                let allFinalItems = [...finalItems];
+                currentPromptsList.forEach((prompt, index) => {
+                  if (index === promptIndex) {
+                    prompt.nodes.forEach(node => {
+                      if (node.type === "slot") {
+                        const answer = answeredSlots[node.id];
+                        if (answer) {
+                          allFinalItems.push({
+                            ...ITEMS.find(i => i.id === answer.itemId),
+                            src: answer.src,
+                            uniqueId: `${answer.itemId}-user-${Date.now()}-${Math.random()}`
+                          });
+                        } else {
+                          const randomItem = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+                          allFinalItems.push({
+                            ...randomItem,
+                            src: `/images/jogo/${randomItem.id}_${node.sentido}.png`,
+                            uniqueId: `${randomItem.id}-auto-${Date.now()}-${Math.random()}`
+                          });
+                        }
+                      }
+                    });
+                  } else if (index > promptIndex) {
+                    prompt.nodes.forEach(node => {
+                      if (node.type === "slot") {
+                        const randomItem = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+                        allFinalItems.push({
+                          ...randomItem,
+                          src: `/images/jogo/${randomItem.id}_${node.sentido}.png`,
+                          uniqueId: `${randomItem.id}-future-${Date.now()}-${Math.random()}`
+                        });
+                      }
+                    });
+                  }
+                });
+                setFinalItems(allFinalItems);
+                clearPhysics(); 
+                setIsGameFinished(true);
+              }} 
+              style={{ padding: "4px 10px", fontSize: "10px", backgroundColor: "transparent", border: "1px solid #001bff", color: "#001bff", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", textTransform: "uppercase" }}
+            >
+              PULAR P/ FINAL
+            </button>
+          </div>
+          <div style={{ width: "200px", height: "6px", backgroundColor: "#e0e0e0", borderRadius: "10px", overflow: "hidden" }}>
+            <div style={{ width: `${((promptIndex + 1) / currentPromptsList.length) * 100}%`, height: "100%", backgroundColor: "#001bff", transition: "width 0.3s ease-out" }} />
+          </div>
+        </div>
+      )}
+
+      {/* CONTEÚDO DA FRASE */}
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "2rem" }}>
+        <div style={{ fontSize: "75px", maxWidth: "80vw", lineHeight: "1.15", textAlign: "center", whiteSpace: "pre-wrap", color: "#191919", fontWeight: "bold" }}>
           {currentPrompt.nodes.map((node, i) => {
-            if (node.type === "text") {
-              return <span key={i}>{node.content}</span>;
-            }
-
-            if (node.type === "slot") {
-              const answer = answeredSlots[node.id];
-              const isActive = activeSlotId === node.id;
-
-              // --- AQUI É ONDE AJUSTAMOS O TAMANHO DO CIGARRO ---
-              const isCigarro = (draggingItem && draggingItem.id === 'cigarro') || (answer && answer.itemId === 'cigarro');
-              const mult = isCigarro ? 1.2 : 1; 
-
-              if (answer) {
-                const itemBase = ITEMS.find((it) => it.id === answer.itemId);
-                const currentScale = (answer.scale || SCALE) * mult;
-                return (
-                  <span key={node.id} style={{ display: "inline-block", width: itemBase.w * currentScale, height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px" }}>
-                    <img src={answer.src} alt="" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: itemBase.w * currentScale, height: itemBase.h * currentScale, objectFit: "contain", pointerEvents: "none" }} />
-                  </span>
-                );
-              }
-
-              const activeScale = (draggingItem && isActive ? (draggingItem.dynamicScale || SCALE) : SCALE) * mult;
-              const svgW = draggingItem && isActive ? draggingItem.w * activeScale : DEFAULT_SLOT_W;
-              const svgH = draggingItem && isActive ? draggingItem.h * activeScale : DEFAULT_SLOT_H;
-
+            if (node.type === "text") return <span key={i}>{node.content}</span>;
+            const ans = answeredSlots[node.id];
+            const isActive = activeSlotId === node.id;
+            const mult = ((draggingItem && draggingItem.id === 'cigarro') || (ans && ans.itemId === 'cigarro')) ? 1.2 : 1;
+            if (ans) {
+              const item = ITEMS.find(it => it.id === ans.itemId);
+              const s = (ans.scale || SCALE) * mult;
               return (
-                <span
-                  key={node.id}
-                  ref={(el) => { if (el) slotRefs.current.set(node.id, el); }}
-                  onClick={() => handleSlotClick(node.id)}
-                  style={{ display: "inline-block", width: Math.max(svgW, 80), height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px", cursor: "pointer" }}
-                >
-                  <svg width={svgW} height={svgH} viewBox={draggingItem && isActive ? `0 0 ${draggingItem.w} ${draggingItem.h}` : `0 0 ${DEFAULT_SLOT_W} ${DEFAULT_SLOT_H}`} style={{ overflow: "visible", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                    <path
-                      d={draggingItem && isActive ? draggingItem.svgPath : DEFAULT_SLOT_PATH}
-                      className="slot-path"
-                      style={{
-                        stroke: isActive ? "#001bff" : "#ccc",
-                        strokeWidth: "2px",
-                        vectorEffect: "non-scaling-stroke", // ISSO DEIXA A LINHA FINA
-                        animationPlayState: isActive ? "running" : "paused"
-                      }}
-                    />
-                  </svg>
+                <span key={node.id} style={{ display: "inline-block", width: item.w * s, height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px" }}>
+                  <img src={ans.src} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: item.w * s, height: item.h * s, objectFit: "contain", pointerEvents: "none" }} alt="" />
                 </span>
               );
             }
-            return null;
+            const s = (draggingItem && isActive ? (draggingItem.dynamicScale || SCALE) : SCALE) * mult;
+            const w = draggingItem && isActive ? draggingItem.w * s : 160;
+            const h = draggingItem && isActive ? draggingItem.h * s : 80;
+            return (
+              <span key={node.id} ref={el => el && slotRefs.current.set(node.id, el)} onClick={() => handleSlotClick(node.id)} style={{ display: "inline-block", width: Math.max(w, 80), height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px", cursor: "pointer" }}>
+                <svg width={w} height={h} viewBox={draggingItem && isActive ? `0 0 ${draggingItem.w} ${draggingItem.h}` : `0 0 160 80`} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", overflow: "visible" }}>
+                  <path d={draggingItem && isActive ? draggingItem.svgPath : DEFAULT_SLOT_PATH} className="slot-path" style={{ stroke: isActive ? "#001bff" : "#ccc" }} />
+                </svg>
+              </span>
+            );
           })}
         </div>
-
         {isPromptComplete && (
-          <div style={{ marginTop: "40px", display: "flex", gap: "20px" }}>
-            <button 
-              onClick={nextPrompt}
-              title={promptIndex + 1 >= currentPromptsList.length ? "Finalizar" : "Próxima frase"}
-              style={{ padding: "8px", cursor: "pointer", border: "none", background: "none", color: "#001bff", display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              {promptIndex + 1 >= currentPromptsList.length ? (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              ) : (
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              )}
-            </button>
-            <button 
-              onClick={sharePrompt}
-              title="Compartilhar"
-              style={{ padding: "8px", cursor: "pointer", border: "none", background: "none", color: "#001bff", display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                <polyline points="16 6 12 2 8 6"></polyline>
-                <line x1="12" y1="2" x2="12" y2="15"></line>
-              </svg>
-            </button>
-          </div>
+          <button onClick={nextPrompt} style={{ marginTop: "40px", background: "none", border: "none", color: "#001bff", cursor: "pointer" }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
         )}
       </div>
 
-      {/* Itens que estão no chão (física) */}
+      {/* ITENS NO CHÃO */}
       {physicsItems.map((item) => (
-        <div
-          key={item.uniqueId}
-          style={{
-            position: "absolute",
-            left: item.x - (item.w * (item.dynamicScale || SCALE)) / 2,
-            top: item.y - (item.h * (item.dynamicScale || SCALE)) / 2,
-            transform: `rotate(${item.angle}rad)`,
-            pointerEvents: "auto", // IMPORTANTE: permite clicar/pegar o item
-            cursor: "grab",        // Cursor de "mão aberta" para pegar
-            zIndex: 40
-          }}
-        >
-          <Image 
-            src={item.src} 
-            alt="" 
-            width={item.w * (item.dynamicScale || SCALE)} 
-            height={item.h * (item.dynamicScale || SCALE)} 
-            draggable={false} 
-          />
+        <div key={item.uniqueId} style={{ position: "absolute", left: item.x - (item.w * (item.dynamicScale || SCALE)) / 2, top: item.y - (item.h * (item.dynamicScale || SCALE)) / 2, transform: `rotate(${item.angle}rad)`, zIndex: 40, cursor: "grab" }}>
+          <Image src={item.src} alt="" width={item.w * (item.dynamicScale || SCALE)} height={item.h * (item.dynamicScale || SCALE)} draggable={false} />
         </div>
       ))}
 
-      {/* Item que está sendo arrastado (na mão) */}
+      {/* ITEM SENDO ARRASTADO */}
       {draggingItem && (
-        <div
-          style={{
-            position: "absolute",
-            // Ajustamos o X e Y para o mouse ficar no centro do item ao arrastar
-            left: draggingItem.x,
-            top: draggingItem.y,
-            pointerEvents: "none", // IMPORTANTE: evita que o item bloqueie o detector do Slot
-            zIndex: 1000,
-            cursor: "grabbing"     // Cursor de "mão fechada"
-          }}
-        >
-          <Image 
-            src={draggingItem.src} 
-            alt="" 
-            width={draggingItem.w * (draggingItem.dynamicScale || SCALE)} 
-            height={draggingItem.h * (draggingItem.dynamicScale || SCALE)} 
-            draggable={false} 
-          />
+        <div style={{ position: "absolute", left: draggingItem.x, top: draggingItem.y, zIndex: 1000, pointerEvents: "none" }}>
+          <Image src={draggingItem.src} alt="" width={draggingItem.w * (draggingItem.dynamicScale || SCALE)} height={draggingItem.h * (draggingItem.dynamicScale || SCALE)} draggable={false} />
         </div>
       )}
     </main>
   );
-}
+  }

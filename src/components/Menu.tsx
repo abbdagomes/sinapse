@@ -47,10 +47,10 @@ export default function MenuSinapse({ iconePersonalizado, tamanho = 100 }) {
         <nav className="flex flex-col gap-6 mt-32 ml-12 text-2xl font-bold">
           <Link href="/" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">HOME</Link>
           <Link href="/sobre-nos" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">SOBRE NÓS</Link>
-          <Link href="/midia" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">MÍDIA</Link>
+          <Link href="/os-sentidos" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">OS SENTIDOS</Link>
           <Link href="/jogo" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">JOGO</Link>
           <Link href="/loja" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">LOJA</Link>
-          <Link href="/os-sentidos" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">OS SENTIDOS</Link>
+          <Link href="/midia" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">MÍDIA</Link>
           <Link href="/comunidade" onClick={() => setAberto(false)} className="hover:italic w-fit transition-all">COMUNIDADE</Link>
         </nav>
       </div>

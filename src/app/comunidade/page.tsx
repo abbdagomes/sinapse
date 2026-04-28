@@ -500,9 +500,6 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
-      <div className="absolute top-10 left-10 z-0 opacity-5">
-        <h1 className="text-[120px] font-black leading-none text-black select-none uppercase">São<br />Paulo</h1>
-      </div>
 
       <div className="relative w-full h-full p-20 flex flex-wrap gap-4 items-start content-start z-[100] pointer-events-none">
         {palavrasSensoriais.map((palavra) => (
@@ -540,9 +537,6 @@ useEffect(() => {
         </AnimatePresence>
       </div>
 
-      <button onClick={() => window.location.href = '/'} className="absolute top-6 left-6 text-black font-black hover:underline z-[110]">
-        ← MAPA
-      </button>
     </main>
   )
 }

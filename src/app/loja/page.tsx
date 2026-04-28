@@ -12,7 +12,7 @@ export default function Loja() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const produtos = [
-    { id: 1, name: 'Casaco oque vc sente', price: 'R$ 89,90', img: '/images/CASACO2.png', top: '15%', left: '5%', size: 420 },
+    { id: 1, name: 'Casaco O Que Sente', price: 'R$ 89,90', img: '/images/CASACO2.png', top: '15%', left: '5%', size: 420 },
     { id: 2, name: 'Boné Sinapse', price: 'R$ 59,90', img: '/images/bone.png', top: '30%', left: '40%', size: 200 },
     { id: 3, name: 'Casaco Sentidos', price: 'R$ 150,00', img: '/images/CASACO.png', top: '55%', left: '5%', size: 420 },
     { id: 4, name: 'Garrafas', price: 'R$ 50,00', img: '/images/GARRAFAS.png', top: '67%', left: '38%', size: 270 },
