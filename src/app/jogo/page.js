@@ -19,6 +19,7 @@ const DEFAULT_SLOT_H = 80;
 const DEFAULT_SLOT_PATH = `M10,0 L150,0 Q160,0 160,10 L160,70 Q160,80 150,80 L10,80 Q0,80 0,70 L0,10 Q0,0 10,0 Z`;
 
 export default function App() {
+  
   const containerRef = useRef(null);
   const slotRefs = useRef(new Map());
   
@@ -508,39 +509,104 @@ if (slotEl) {
       )}
 
       {/* CONTEÚDO DA FRASE */}
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "2rem" }}>
-        <div style={{ fontSize: "75px", maxWidth: "80vw", lineHeight: "1.15", textAlign: "center", whiteSpace: "pre-wrap", color: "#191919", fontWeight: "bold" }}>
-          {currentPrompt.nodes.map((node, i) => {
-            if (node.type === "text") return <span key={i}>{node.content}</span>;
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "2rem", pointerEvents: "none" }}>
+        <div style={{ 
+          fontSize: "75px", 
+          maxWidth: "85vw", 
+          lineHeight: "1.5", 
+          textAlign: "center", 
+          whiteSpace: "pre-wrap", 
+          color: "#191919", 
+          fontWeight: "bold",
+          fontFamily: "Satoshi, sans-serif", // Fonte Satoshi aplicada
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          pointerEvents: "auto" 
+        }}>
+          {currentPrompt && currentPrompt.nodes ? currentPrompt.nodes.map((node, i) => {
+            if (node.type === "text") {
+              return <span key={i} style={{ margin: "0 10px" }}>{node.content}</span>;
+            }
+
             const ans = answeredSlots[node.id];
             const isActive = activeSlotId === node.id;
-            const mult = ((draggingItem && draggingItem.id === 'cigarro') || (ans && ans.itemId === 'cigarro')) ? 1.2 : 1;
-            if (ans) {
-              const item = ITEMS.find(it => it.id === ans.itemId);
-              const s = (ans.scale || SCALE) * mult;
-              return (
-                <span key={node.id} style={{ display: "inline-block", width: item.w * s, height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px" }}>
-                  <img src={ans.src} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: item.w * s, height: item.h * s, objectFit: "contain", pointerEvents: "none" }} alt="" />
-                </span>
-              );
-            }
-            const s = (draggingItem && isActive ? (draggingItem.dynamicScale || SCALE) : SCALE) * mult;
-            const w = draggingItem && isActive ? draggingItem.w * s : 160;
-            const h = draggingItem && isActive ? draggingItem.h * s : 80;
+            const hasDragging = draggingItem && isActive;
+            
+            // Ajuste de tamanho para itens específicos como o cigarro
+            const isCigarro = (hasDragging && draggingItem.id === 'cigarro') || (ans && ans.itemId === 'cigarro');
+            const mult = isCigarro ? 1.2 : 1;
+            const s = (ans ? (ans.scale || SCALE) : (hasDragging ? (draggingItem.dynamicScale || SCALE) : SCALE)) * mult;
+
+            // Largura dinâmica do slot
+            const w = (ans || hasDragging) 
+              ? (ans ? ITEMS.find(it => it.id === ans.itemId).w : draggingItem.w) * s 
+              : 160;
+
             return (
-              <span key={node.id} ref={el => el && slotRefs.current.set(node.id, el)} onClick={() => handleSlotClick(node.id)} style={{ display: "inline-block", width: Math.max(w, 80), height: 80, position: "relative", verticalAlign: "middle", margin: "0 8px", cursor: "pointer" }}>
-                <svg width={w} height={h} viewBox={draggingItem && isActive ? `0 0 ${draggingItem.w} ${draggingItem.h}` : `0 0 160 80`} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", overflow: "visible" }}>
-                  <path d={draggingItem && isActive ? draggingItem.svgPath : DEFAULT_SLOT_PATH} className="slot-path" style={{ stroke: isActive ? "#001bff" : "#ccc" }} />
-                </svg>
+              <span
+                key={node.id}
+                ref={el => el && slotRefs.current.set(node.id, el)}
+                onClick={() => handleSlotClick(node.id)}
+                style={{ 
+                  display: "inline-block", 
+                  width: Math.max(w, 80), 
+                  height: 80, 
+                  position: "relative", 
+                  verticalAlign: "middle", 
+                  margin: "0 10px", 
+                  cursor: "pointer" 
+                }}
+              >
+                {ans ? (
+                  <img 
+                    src={ans.src} 
+                    style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "auto", objectFit: "contain", pointerEvents: "none" }} 
+                    alt="" 
+                  />
+                ) : (
+                  <svg 
+                    width="100%" 
+                    height="100%" 
+                    viewBox={hasDragging ? `0 0 ${draggingItem.w} ${draggingItem.h}` : "0 0 160 80"} 
+                    style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", overflow: "visible" }}
+                  >
+                    <path 
+                      d={hasDragging ? draggingItem.svgPath : DEFAULT_SLOT_PATH} 
+                      className="slot-path" 
+                      style={{ 
+                        stroke: isActive ? "#001bff" : "#ccc", 
+                        strokeWidth: hasDragging ? 4 : 2,
+                        fill: "none"
+                      }} 
+                    />
+                  </svg>
+                )}
               </span>
             );
-          })}
+          }) : null}
         </div>
-        {isPromptComplete && (
-          <button onClick={nextPrompt} style={{ marginTop: "40px", background: "none", border: "none", color: "#001bff", cursor: "pointer" }}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-        )}
+
+        {/* BOTÕES DE INTERAÇÃO */}
+        <div style={{ display: "flex", gap: "20px", marginTop: "50px", pointerEvents: "auto" }}>
+          {isPromptComplete && (
+            <button 
+              onClick={sharePrompt} 
+              style={{ padding: "12px 24px", borderRadius: "50px", border: "none", backgroundColor: "#001bff", color: "white", fontWeight: "bold", cursor: "pointer", fontFamily: "Satoshi, sans-serif" }}
+            >
+              PARTILHAR FRASE
+            </button>
+          )}
+          {isPromptComplete && (
+            <button onClick={nextPrompt} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#001bff" strokeWidth="4">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ITENS NO CHÃO */}

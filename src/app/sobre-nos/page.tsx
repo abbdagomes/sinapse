@@ -55,7 +55,7 @@ export default function SobreNos() {
     /* ADICIONEI 'antialiased' e a variável da fonte aqui no main */
     <main className="min-h-screen bg-[#f7f7f7] py-24 px-8 overflow-x-hidden relative select-none flex flex-col items-center gap-16 antialiased" style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}>
       
-      <Menu iconePersonalizado="/images/menu1.png" />
+      <Menu iconePersonalizado="/images/menu2.png" />
 
       <header className="w-full max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-[#0004FF] tracking-tighter uppercase italic">Sobre Nós</h1>
