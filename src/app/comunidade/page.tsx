@@ -5,6 +5,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Menu from "../../components/Menu";
 
+// ===== LUZES DO "VIDA NOTURNA" =====
+// Cores que piscam no fundo, na ordem em que aparecem. Pode adicionar, tirar ou trocar
+// (códigos hexadecimais entre aspas, separados por vírgula).
+const CORES_BALADA = [
+  '#ff00bf', // rosa
+  '#0004FF', // azul do site
+  '#7000ff', // roxo
+  '#ff0000', // vermelho
+  '#ff0080', // pink
+  '#ffee00', // amarelo
+  '#06e0ce', // azul-piscina
+]
+// Quanto tempo cada cor fica acesa, em segundos (menor = pisca mais rápido)
+const TEMPO_POR_COR = 0.2
+// Tempo de cada "pulo" das silhuetas, em segundos (0.5 = 120 batidas por minuto)
+const TEMPO_PULO = 0.5
+// De quantos em quantos segundos acontece o flash branco do estrobo
+const INTERVALO_ESTROBO = 2.5
+
 // 1. DECLARE O CANVAS AQUI FORA (FORA DA FUNÇÃO PRINCIPAL)
 // Adicione a prop no CanvasGrafite
 const CanvasGrafite = ({ sprayAudio }: { sprayAudio: HTMLAudioElement | null }) => {
@@ -96,6 +115,13 @@ export default function ComunidadeSensorial() {
   
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const sprayAudioRef = useRef<HTMLAudioElement | null>(null); // Nova ref para o spray
+  // Cronômetro que desliga a animação depois de 30 s (guardado para poder ser cancelado)
+  const timerAnimacaoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Ao sair da página, cancela o cronômetro pendente
+  useEffect(() => () => {
+    if (timerAnimacaoRef.current) clearTimeout(timerAnimacaoRef.current)
+  }, [])
 
 useEffect(() => {
   setMounted(true);
@@ -147,6 +173,9 @@ useEffect(() => {
   const ativarSensacao = (palavra: Interacao) => {
     if (!palavra.som && !palavra.tipoAnimacao) return;
 
+    // Cancela o cronômetro da animação anterior, para ele não desligar a nova
+    if (timerAnimacaoRef.current) clearTimeout(timerAnimacaoRef.current)
+
     if (animacaoAtiva?.id === palavra.id) {
       setAnimacaoAtiva(null)
       return
@@ -154,9 +183,9 @@ useEffect(() => {
 
     setAnimacaoAtiva(palavra)
 
-    setTimeout(() => {
+    timerAnimacaoRef.current = setTimeout(() => {
       setAnimacaoAtiva(null)
-    }, 30000); 
+    }, 30000);
   }
 
   const handleSend = () => {
@@ -359,11 +388,17 @@ useEffect(() => {
             className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
           >
             <motion.div 
-              animate={{ 
-                backgroundColor: ['#ff00bf', '#7000ff', '#ff0080', '#ffee00', '#06e0ce']
+              // As cores vêm de CORES_BALADA (topo do arquivo). A primeira é repetida no fim
+              // para a última cor também ter seu tempo antes de a sequência recomeçar.
+              animate={{
+                backgroundColor: [...CORES_BALADA, CORES_BALADA[0]]
               }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 opacity-40" 
+              transition={{
+                duration: TEMPO_POR_COR * CORES_BALADA.length, // tempo da volta inteira
+                repeat: Infinity,
+                ease: (t: number) => (t < 1 ? 0 : 1), // troca de cor de uma vez, sem misturar
+              }}
+              className="absolute inset-0 opacity-80"
             />
 
             <div className="absolute top-0 w-full h-full flex justify-between px-10 z-10">
@@ -371,7 +406,7 @@ useEffect(() => {
                 <motion.div
                   key={`spot-${i}`}
                   animate={{ opacity: [0.2, 0.6, 0.2], scaleX: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.5 }}
+                  transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.2 }}
                   className={`w-[300px] h-[600px] bg-gradient-to-b from-white/20 to-transparent blur-3xl origin-top ${i === 0 ? '-rotate-12' : 'rotate-12'}`}
                 />
               ))}
@@ -382,8 +417,10 @@ useEffect(() => {
               animate={{ y: 50 }} 
               className="absolute top-0 left-1/2 z-30"
             >
+              {/* Globo: parado, só cintila (brilho sobe e desce rápido) */}
               <motion.div
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                animate={{ filter: ['brightness(1)', 'brightness(1.6)', 'brightness(1)'] }}
+                transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
                 className="relative w-[250px] h-[250px]"
               >
                 <Image 
@@ -406,7 +443,7 @@ useEffect(() => {
             >
               <motion.div 
                 animate={{ opacity: [0.1, 0.3, 0.1] }}
-                transition={{ duration: 3, repeat: Infinity }}
+                transition={{ duration: 1, repeat: Infinity }}
                 className="w-full h-full bg-white/5 blur-xl"
               />
             </div>
@@ -417,15 +454,35 @@ useEffect(() => {
               transition={{ duration: 1 }}
               className="absolute bottom-0 w-full flex justify-center z-20"
             >
-              <div className="relative w-full h-[450px]">
-                <Image 
-                  src="/images/silhuetas-balada.png" 
+              {/* Silhuetas: pulam no ritmo (sobe e desce) e balançam de um lado para o outro */}
+              <motion.div
+                animate={{ y: [0, -14, 0], rotate: [-1.5, 1.5, -1.5] }}
+                transition={{
+                  y: { duration: TEMPO_PULO, repeat: Infinity, ease: "easeOut" },
+                  rotate: { duration: TEMPO_PULO * 4, repeat: Infinity, ease: "easeInOut" },
+                }}
+                className="relative w-full h-[450px] origin-bottom"
+              >
+                <Image
+                  src="/images/silhuetas-balada.png"
                   alt="Pessoas dançando"
                   fill
                   className="object-contain object-bottom"
                 />
-              </div>
+              </motion.div>
             </motion.div>
+
+            {/* Estrobo: a cada INTERVALO_ESTROBO segundos, dois flashes brancos bem rápidos */}
+            <motion.div
+              animate={{ opacity: [0, 0, 0.85, 0, 0.85, 0] }}
+              transition={{
+                duration: INTERVALO_ESTROBO,
+                repeat: Infinity,
+                ease: "linear",
+                times: [0, 0.94, 0.95, 0.97, 0.98, 1], // os flashes acontecem no fim de cada intervalo
+              }}
+              className="absolute inset-0 bg-white z-40"
+            />
 
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 z-0" />
           </motion.div>

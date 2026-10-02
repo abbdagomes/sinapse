@@ -10,6 +10,8 @@ export default function Loja() {
   const [gateOpen, setGateOpen] = useState(false);
   const [carrinho, setCarrinho] = useState([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  // Posição do cursor sobre o portão fechado (null = cursor fora do portão)
+  const [cursorPortao, setCursorPortao] = useState<{ x: number; y: number } | null>(null);
 
   const produtos = [
     { id: 1, name: 'Casaco O Que Sente', price: 'R$ 89,90', img: '/images/CASACO2.png', top: '15%', left: '5%', size: 420 },
@@ -55,12 +57,24 @@ const addToCart = (produto: any) => {
               setGateOpen(true);
               tocarSomPortao();
             }}
+            onMouseMove={(e) => setCursorPortao({ x: e.clientX, y: e.clientY })}
+            onMouseLeave={() => setCursorPortao(null)}
             className="fixed inset-0 z-[100] cursor-pointer"
           >
             <Image src="/images/portao.png" alt="Portão" fill className="object-cover" priority />
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mensagem que acompanha o cursor sobre o portão fechado */}
+      {!gateOpen && cursorPortao && (
+        <div
+          className="fixed z-[101] pointer-events-none bg-[#0004FF] text-white text-xs py-1 px-3 rounded-md font-bold uppercase tracking-widest shadow-lg whitespace-nowrap"
+          style={{ left: cursorPortao.x + 16, top: cursorPortao.y + 16 }}
+        >
+          Clique para abrir
+        </div>
+      )}
 
       {/* 2. FUNDO DA LOJA */}
       <div className="absolute inset-0">
