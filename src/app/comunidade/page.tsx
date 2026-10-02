@@ -9,7 +9,7 @@ import Menu from "../../components/Menu";
 // Cores que piscam no fundo, na ordem em que aparecem. Pode adicionar, tirar ou trocar
 // (códigos hexadecimais entre aspas, separados por vírgula).
 const CORES_BALADA = [
-  '#ff00bf', // rosa
+  '#59ff00', // rosa
   '#0004FF', // azul do site
   '#7000ff', // roxo
   '#ff0000', // vermelho
@@ -533,8 +533,8 @@ useEffect(() => {
             className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
           >
             <motion.div
-              initial={{ x: '-100%' }} 
-              animate={{ x: '100vw' }}  
+              // Entra por fora da tela à esquerda e sai pela direita (mesma unidade, vw, nas duas pontas)
+              animate={{ x: ['-100vw', '100vw'] }}
               transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               className="absolute top-[25%] left-0 flex items-center"
             >
@@ -565,8 +565,8 @@ useEffect(() => {
             whileHover={{ scale: 1.1, rotate: 3 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => ativarSensacao(palavra)}
-            className={`px-6 py-3 bg-white border-2 border-black text-2xl md:text-4xl font-bold cursor-pointer pointer-events-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors ${
-              (palavra.som || palavra.tipoAnimacao) ? 'hover:text-[#0066ff] hover:border-[#0066ff]' : 'hover:border-gray-400'
+            className={`px-6 py-3 bg-white border-2 border-black text-2xl md:text-4xl font-bold cursor-pointer pointer-events-auto transition-colors ${
+              (palavra.som || palavra.tipoAnimacao) ? 'hover:text-[#0004FF] hover:border-[#0004FF]' : 'hover:border-gray-400'
             }`}
           >
             {palavra.label}
@@ -581,13 +581,13 @@ useEffect(() => {
             type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Sua sugestão..."
-            className="flex-1 p-4 border-2 border-black outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white"
+            className="flex-1 p-4 border-2 border-black outline-none bg-white"
           />
-          <button onClick={handleSend} className="bg-[#0066ff] text-white px-8 py-4 border-2 border-black font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">ENVIAR</button>
+          <button onClick={handleSend} className="bg-[#0004FF] text-white px-8 py-4 border-2 border-black font-bold">ENVIAR</button>
         </div>
         <AnimatePresence>
           {showPopup && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#0066ff] text-white px-6 py-2 border-2 border-black font-bold">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="bg-[#0004FF] text-white px-6 py-2 border-2 border-black font-bold">
               Sugestão enviada ✓
             </motion.div>
           )}

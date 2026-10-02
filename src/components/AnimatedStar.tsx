@@ -117,10 +117,6 @@ export default function AnimatedStar({
       onHoverEnd={() => setIsHovered(false)}
     >
       <Link href={href} className="relative flex items-center group cursor-pointer no-underline">
-        {isHovered && (
-          <div className="absolute inset-0 -m-8 bg-white/50 blur-3xl rounded-full" />
-        )}
-        
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
