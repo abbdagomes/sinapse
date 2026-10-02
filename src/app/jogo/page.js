@@ -10,7 +10,7 @@ import Menu from "../../components/Menu";
 
 import FinalPoster from "./components/FinalPoster";
 import { PROMPTS } from "../../data/prompts";
-import { ITEMS, SCALE } from "../../data/items";
+import { ITEMS, SCALE, TAMANHO_VISIVEL } from "../../data/items";
 import { shuffleArray } from "../../lib/utils";
 
 
@@ -80,10 +80,9 @@ export default function App() {
     const dynamicSrc = `/images/jogo/${img.id}_${sentidoAtivo}.png`;
     const uniqueId = `${img.id}-${Date.now()}-${i}`;
 
-    // 1. Aumentamos o targetSize para o cigarro (que tem w: 80) cair grande
+    // 1. Escala de cada item calculada em data/items.js (mesmo tamanho visível para todos)
     const isCigarro = img.id === 'cigarro';
-    const targetSize = isCigarro ? 280 : 180;
-    const autoScale = targetSize / Math.max(img.w, img.h);
+    const autoScale = img.dynamicScale;
 
     activeItemsRef.current.set(uniqueId, {
       ...img,
@@ -493,10 +492,12 @@ if (slotEl) {
             const isActive = activeSlotId === node.id;
             const hasDragging = draggingItem && isActive;
             
-            // Ajuste de tamanho para itens específicos como o cigarro
-            const isCigarro = (hasDragging && draggingItem.id === 'cigarro') || (ans && ans.itemId === 'cigarro');
-            const mult = isCigarro ? 1.2 : 1;
-            const s = (ans ? (ans.scale || SCALE) : (hasDragging ? (draggingItem.dynamicScale || SCALE) : SCALE)) * mult;
+            const s = ans ? (ans.scale || SCALE) : (hasDragging ? (draggingItem.dynamicScale || SCALE) : SCALE);
+
+            // Pontilhado: desenhado ao redor do traçado do item (caixaContorno),
+            // com o mesmo tamanho do desenho visível da imagem
+            const [cx, cy, cw, ch] = hasDragging ? draggingItem.caixaContorno : [0, 0, DEFAULT_SLOT_W, DEFAULT_SLOT_H];
+            const k = hasDragging ? TAMANHO_VISIVEL / Math.max(cw, ch) : 1;
 
             // Largura dinâmica do slot
             const w = (ans || hasDragging) 
@@ -525,20 +526,23 @@ if (slotEl) {
                     alt="" 
                   />
                 ) : (
-                  <svg 
-                    width="100%" 
-                    height="100%" 
-                    viewBox={hasDragging ? `0 0 ${draggingItem.w} ${draggingItem.h}` : "0 0 160 80"} 
+                  // Contorno no tamanho real do item arrastado (pode passar da altura da linha)
+                  <svg
+                    width={cw * k}
+                    height={ch * k}
+                    viewBox={`${cx} ${cy} ${cw} ${ch}`}
                     style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", overflow: "visible" }}
                   >
-                    <path 
-                      d={hasDragging ? draggingItem.svgPath : DEFAULT_SLOT_PATH} 
-                      className="slot-path" 
-                      style={{ 
-                        stroke: isActive ? "#001bff" : "#ccc", 
-                        strokeWidth: hasDragging ? 4 : 2,
+                    <path
+                      d={hasDragging ? draggingItem.svgPath : DEFAULT_SLOT_PATH}
+                      className="slot-path"
+                      style={{
+                        stroke: isActive ? "#001bff" : "#ccc",
+                        strokeWidth: "2px",
+                        vectorEffect: "non-scaling-stroke", // linha e tracinhos com o mesmo tamanho em qualquer forma
+                        animationPlayState: isActive ? "running" : "paused", // só o espaço ativo anima
                         fill: "none"
-                      }} 
+                      }}
                     />
                   </svg>
                 )}
