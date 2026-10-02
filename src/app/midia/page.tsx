@@ -56,7 +56,7 @@ export default function Midia() {
   }}
     >      
       {/* Menu com ícone diferente para a Mídia */}
-      <Menu iconePersonalizado="/images/menu3.png" tamanho={110} />
+      <Menu iconePersonalizado="/images/menu3.png" />
 
       {/* Título */}
       <div className="absolute top-10 left-10 z-10 pointer-events-none">

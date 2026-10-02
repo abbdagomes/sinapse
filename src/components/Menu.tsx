@@ -3,8 +3,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-// Adicionamos 'tamanho = 100' aqui nos parênteses
-export default function MenuSinapse({ iconePersonalizado, tamanho = 100 }) {
+// Tamanho do ícone do menu, igual em todas as páginas
+const TAMANHO_ICONE = 75;
+
+export default function MenuSinapse({ iconePersonalizado }) {
   const [aberto, setAberto] = useState(false);
 
   return (
@@ -25,8 +27,8 @@ export default function MenuSinapse({ iconePersonalizado, tamanho = 100 }) {
           <Image 
             src={iconePersonalizado} 
             alt="Menu Icon" 
-            width={tamanho}   // <--- AGORA USA O TAMANHO QUE VOCÊ MANDAR
-            height={tamanho}  // <--- AGORA USA O TAMANHO QUE VOCÊ MANDAR
+            width={TAMANHO_ICONE}
+            height={TAMANHO_ICONE}
             className="object-contain" 
           />
         ) : (

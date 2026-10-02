@@ -184,7 +184,6 @@ export default function FinalPoster({ selectedItems }) {
         position: "relative",
         overflow: "hidden",
         backgroundColor: "#ffffff",
-        fontFamily: "system-ui, sans-serif",
         userSelect: "none",
         WebkitUserSelect: "none",
       }}

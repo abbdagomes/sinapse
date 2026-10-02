@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import Menu from "../../components/Menu";
 
 export default function SobreNos() {
@@ -52,8 +51,7 @@ export default function SobreNos() {
   }, []);
 
   return (
-    /* ADICIONEI 'antialiased' e a variável da fonte aqui no main */
-    <main className="min-h-screen bg-[#f7f7f7] py-24 px-8 overflow-x-hidden relative select-none flex flex-col items-center gap-16 antialiased" style={{ fontFamily: 'var(--font-geist-sans), sans-serif' }}>
+    <main className="min-h-screen bg-[#f7f7f7] py-24 px-8 overflow-x-hidden relative select-none flex flex-col items-center gap-16 antialiased">
       
       <Menu iconePersonalizado="/images/menu2.png" />
 
@@ -95,16 +93,6 @@ export default function SobreNos() {
           <div className="md:w-1/2 flex justify-center opacity-20"></div>
         </div>
 
-      </div>
-
-      <div className="fixed bottom-8 left-8 z-0 opacity-80 pointer-events-none">
-        <Image 
-          src="/images/sinapse_logo.png" 
-          alt="Logo Grande Fundo" 
-          width={400} 
-          height={150} 
-          style={{ height: 'auto' }}
-        />
       </div>
     </main>
   );

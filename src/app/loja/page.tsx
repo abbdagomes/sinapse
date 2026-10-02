@@ -43,7 +43,7 @@ const addToCart = (produto: any) => {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      <Menu iconePersonalizado="/images/menu4.png" tamanho={100} />
+      <Menu iconePersonalizado="/images/menu4.png" />
       
       {/* 1. PORTÃO */}
       <AnimatePresence>

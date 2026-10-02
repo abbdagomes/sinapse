@@ -10,6 +10,10 @@ module.exports = {
       colors: {
         sinapseBlue: '#0004FF',
       },
+      fontFamily: {
+        // --font-satoshi vem do layout.tsx (next/font/local)
+        sans: ['var(--font-satoshi)', 'sans-serif'],
+      },
     },
   },
   plugins: [],

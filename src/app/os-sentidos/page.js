@@ -62,7 +62,7 @@ export default function SensoryPage() {
     <main className="bg-[#f7f7f7] min-h-screen flex flex-col items-center py-16 gap-16">
 
       {/* MENU ADICIONADO AQUI */}
-      <Menu iconePersonalizado="/images/menu1.png" tamanho={100} />
+      <Menu iconePersonalizado="/images/menu1.png" />
 
       {sections.map((section, index) => (
         <div
@@ -76,12 +76,13 @@ export default function SensoryPage() {
             {section.text}
           </div>
 
-          {/* Imagem interativa */}
-          <div className="w-1/2 flex justify-center">
+          {/* Imagem interativa: a caixa tem altura fixa (h-72) para o texto
+              não se mexer quando a imagem troca por outra de proporção diferente */}
+          <div className="w-1/2 min-w-0 h-72 flex items-center justify-center">
             <img
               src={getImageSrc(section.sense)}
               alt={`Sentido ${section.sense}`}
-              className="cursor-pointer max-h-72 w-auto transition-transform duration-300 hover:scale-105"
+              className="cursor-pointer max-h-full max-w-full w-auto h-auto object-contain transition-transform duration-300 hover:scale-105"
               onClick={() => toggleImage(section.sense)}
             />
           </div>

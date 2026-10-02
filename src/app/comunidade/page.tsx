@@ -172,7 +172,7 @@ useEffect(() => {
     <main className="relative w-full h-screen bg-[#f7f7f7] overflow-hidden font-sans">
       
       {/* 1. SEU MENU FICA AQUI - Z-INDEX 10001 GARANTE QUE ELE FIQUE NO TOPO DE TUDO */}
-      <Menu iconePersonalizado="/images/menu5.png" tamanho={100} />
+      <Menu iconePersonalizado="/images/menu5.png" />
 
       <AnimatePresence>
         {/* CAMADA DE GRAFITE */}
@@ -518,7 +518,7 @@ useEffect(() => {
       </div>
 
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-4 w-full max-w-md px-4">
-        <label className="text-xl font-bold bg-white px-2 uppercase">O que define São Paulo pra você?</label>
+        <label className="text-xl font-bold px-2 uppercase">O que define São Paulo pra você?</label>
         <div className="flex w-full gap-2">
           <input 
             type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
