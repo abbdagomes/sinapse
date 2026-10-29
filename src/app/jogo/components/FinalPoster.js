@@ -183,7 +183,7 @@ export default function FinalPoster({ selectedItems }) {
         width: "100vw",
         position: "relative",
         overflow: "hidden",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#f7f7f7",
         userSelect: "none",
         WebkitUserSelect: "none",
       }}

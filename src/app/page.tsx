@@ -5,7 +5,7 @@ import AnimatedStar from "@/components/AnimatedStar";
 
 export default function Home() {
   return (
-    <main className="relative w-full h-screen bg-white overflow-hidden select-none">
+    <main className="relative w-full h-screen bg-[#f7f7f7] overflow-hidden select-none">
       
       {/* --- APENAS O SLOGAN (Topo Esquerdo) --- */}
       <div className="absolute top-12 left-13 z-20 flex flex-col pointer-events-none">

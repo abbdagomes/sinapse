@@ -167,7 +167,7 @@ export default function App() {
     try {
       const canvas = await html2canvas(containerRef.current, {
         useCORS: true,
-        backgroundColor: "#f9f9f9",
+        backgroundColor: "#f7f7f7",
         scale: 2 
       });
 
@@ -385,7 +385,7 @@ if (slotEl) {
   // 2. TELA DE CARREGAMENTO
   if (!currentPrompt) {
     return (
-      <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center", alignItems: "center", fontSize: "2rem", backgroundColor: "#f9f9f9" }}>
+      <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center", alignItems: "center", fontSize: "2rem", backgroundColor: "#f7f7f7" }}>
         Carregando jogo...
       </div>
     );
@@ -397,7 +397,7 @@ if (slotEl) {
       ref={containerRef}
       style={{
         height: "100vh", width: "100vw", position: "relative", overflow: "hidden",
-        backgroundColor: "#f9f9f9", cursor: draggingItem ? "grabbing" : "auto"
+        backgroundColor: "#f7f7f7", cursor: draggingItem ? "grabbing" : "auto"
       }}
     >
       {/* Menu fixo durante a gameplay */}

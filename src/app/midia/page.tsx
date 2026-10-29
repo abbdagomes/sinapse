@@ -68,10 +68,10 @@ export default function Midia() {
       {/* Menu com ícone diferente para a Mídia */}
       <Menu iconePersonalizado="/images/menu3.png" />
 
-      {/* Título */}
-      <div className="absolute top-10 left-10 z-10 pointer-events-none">
-        <h1 className="text-5xl font-black text-white mix-blend-difference italic">
-          MÍDIA / <span className="text-[#0004FF]">LAMBE-LAMBE</span>
+      {/* Título (mesmo tamanho e posição do título de Sobre Nós) */}
+      <div className="absolute top-24 inset-x-8 z-10 pointer-events-none">
+        <h1 className="w-full max-w-6xl mx-auto text-3xl font-bold tracking-tighter uppercase italic text-[#0004FF]">
+          Mídia
         </h1>
       </div>
 
