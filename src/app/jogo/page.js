@@ -334,7 +334,7 @@ if (slotEl) {
   useEffect(() => {
     if (!currentPrompt) return;
 
-    const engine = Matter.Engine.create({ gravity: { x: 0, y: 1.1 } });
+    const engine = Matter.Engine.create({ gravity: { x: 0, y: 1.6 } });
     engineRef.current = engine;
 
     const width = window.innerWidth;
@@ -484,8 +484,16 @@ if (slotEl) {
           pointerEvents: "auto" 
         }}>
           {currentPrompt && currentPrompt.nodes ? currentPrompt.nodes.map((node, i) => {
+            // Pontuação logo depois de um espaço fica grudada nele (não quebra sozinha pra linha de baixo)
+            const PONTUACAO = /^[,.;:!?]+/;
+            const nextNode = currentPrompt.nodes[i + 1];
+            const pontuacao = node.type === "slot" && nextNode?.type === "text" ? nextNode.content.match(PONTUACAO)?.[0] : null;
+
             if (node.type === "text") {
-              return <span key={i} style={{ margin: "0 10px" }}>{node.content}</span>;
+              const prevNode = currentPrompt.nodes[i - 1];
+              const content = prevNode?.type === "slot" ? node.content.replace(PONTUACAO, "") : node.content;
+              if (!content.trim()) return null;
+              return <span key={i} style={{ margin: "0 10px" }}>{content}</span>;
             }
 
             const ans = answeredSlots[node.id];
@@ -504,9 +512,8 @@ if (slotEl) {
               ? (ans ? ITEMS.find(it => it.id === ans.itemId).w : draggingItem.w) * s 
               : 160;
 
-            return (
+            const slotEl = (
               <span
-                key={node.id}
                 ref={el => el && slotRefs.current.set(node.id, el)}
                 onClick={() => handleSlotClick(node.id)}
                 style={{ 
@@ -546,6 +553,14 @@ if (slotEl) {
                     />
                   </svg>
                 )}
+              </span>
+            );
+
+            if (!pontuacao) return <span key={node.id} style={{ display: "contents" }}>{slotEl}</span>;
+            return (
+              <span key={node.id} style={{ display: "inline-flex", alignItems: "center", whiteSpace: "nowrap" }}>
+                {slotEl}
+                <span style={{ margin: "0 10px" }}>{pontuacao}</span>
               </span>
             );
           }) : null}
