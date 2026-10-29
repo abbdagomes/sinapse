@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Menu from "../../components/Menu";
+import { SENTIDOS } from "../../data/sentidos";
 
 export default function SobreNos() {
   
@@ -51,22 +52,26 @@ export default function SobreNos() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#f7f7f7] py-24 px-8 overflow-x-hidden relative select-none flex flex-col items-center gap-16 antialiased">
-      
+    <main className="min-h-screen bg-[#f7f7f7] py-16 overflow-x-hidden relative select-none flex flex-col items-center gap-16 antialiased">
+
       <Menu iconePersonalizado="/images/menu2.png" />
 
-      <header className="w-full max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-[#0004FF] tracking-tighter uppercase italic">Sobre Nós</h1>
-      </header>
-
-      <div className="w-full max-w-6xl flex flex-col gap-20">
+      {/* Mesmo recuo e largura de Os Sentidos (py-16 na página, max-w-6xl com px-10) */}
+      <div className="w-full max-w-6xl px-10 flex flex-col gap-20">
         
-        {/* Bloco 1 */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="md:w-1/2 text-black text-lg leading-relaxed font-medium tracking-tight">
-            O site Sinapse surge da ideia de experimentar São Paulo através dos cinco sentidos humanos (tato, visão, olfato, audição e paladar).
+        {/* Bloco 1: mesma estrutura da primeira linha de Os Sentidos (linha h-72 com o texto centralizado).
+            Uma cópia invisível do texto de lá ocupa o espaço, e o nosso texto começa no topo dela,
+            então os dois começam exatamente na mesma altura */}
+        <div className="flex flex-col md:flex-row md:h-72 items-center justify-between gap-10">
+          <div className="md:w-1/2 relative">
+            <div aria-hidden className="hidden md:block invisible text-lg leading-relaxed font-medium">
+              {SENTIDOS[0].text}
+            </div>
+            <div className="md:absolute md:inset-x-0 md:top-0 text-black text-lg leading-relaxed font-medium tracking-tight">
+              O site Sinapse surge da ideia de experimentar São Paulo através dos cinco sentidos humanos (tato, visão, olfato, audição e paladar).
+            </div>
           </div>
-          <div className="md:w-1/2 flex justify-center opacity-20"></div>
+          <div className="md:w-1/2 min-w-0 flex justify-center opacity-20"></div>
         </div>
 
         {/* Bloco 2 */}
