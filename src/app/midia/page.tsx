@@ -23,6 +23,16 @@ export default function Midia() {
     "/images/cartazes/poster5.png",
     "/images/cartazes/poster6.png",
     "/images/cartazes/poster7.png",
+    "/images/cartazes/poster8.png",
+    "/images/cartazes/poster9.png",
+    "/images/cartazes/poster10.png",
+    "/images/cartazes/poster11.png",
+    "/images/cartazes/poster12.png",
+    "/images/cartazes/poster13.png",
+     "/images/cartazes/poster14.png",
+    "/images/cartazes/poster15.png",
+    "/images/cartazes/poster16.png",
+    "/images/cartazes/poster17.png",
   ];
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {    
